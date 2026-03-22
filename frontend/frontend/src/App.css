@@ -1,0 +1,148 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.hero h1 {
+  margin-bottom: 12px;
+  font-size: 2.5rem;
+}
+
+.hero p {
+  margin: 0 auto;
+  max-width: 700px;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.analyse-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.analyse-form input {
+  flex: 1;
+  min-width: 260px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: white;
+  font-size: 1rem;
+}
+
+.analyse-form button {
+  padding: 14px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #f97316;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.analyse-form button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-box {
+  background: #7f1d1d;
+  color: #fecaca;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.summary-card,
+.card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.summary-card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.history {
+  margin-bottom: 20px;
+}
+
+.history-title {
+  margin-bottom: 10px;
+  color: #cbd5e1;
+  font-weight: bold;
+}
+
+.history-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.history-button {
+  padding: 10px 14px;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: #1e293b;
+  color: white;
+  cursor: pointer;
+}
+
+.history-button:hover {
+  background: #334155;
+}
