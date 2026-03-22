@@ -2,7 +2,7 @@
 
 ## Website Analysis Prompt
 
-This project uses a structured prompt to guide the AI (Llama 3 via Cloudflare Workers AI) to perform website analysis based on fetched HTML.
+This project uses a carefully engineered prompt to guide the AI (Llama 3 via Cloudflare Workers AI) for reliable, structured website analysis based on fetched HTML.
 
 ---
 
@@ -32,21 +32,23 @@ Do not include any text before or after the JSON.
 
 Use this exact structure:
 {
-"url": "{url}",
-"riskScore": number (1-10),
-"security": ["..."],
-"performance": ["..."],
-"seo": ["..."],
-"summary": "..."
+  "url": "{url}",
+  "riskScore": number (1-10),
+  "security": ["..."],
+  "performance": ["..."],
+  "seo": ["..."],
+  "summary": "..."
 }
 
 Rules:
 
-riskScore must be an integer from 1 to 10
-security, performance, and seo must always be arrays
-summary must always be a short string
-If the URL starts with https://, assume SSL is present
-return JSON only
+- riskScore must be an integer from 1 to 10
+- security, performance, and seo MUST always be arrays, even if empty
+- summary must always be a short string
+- If no findings are available, return an empty array []
+- If the URL starts with https://, assume SSL is present
+- Do not include trailing commas in JSON
+- return JSON only
 
 ---
 
@@ -95,8 +97,8 @@ This ensures honest output instead of guessing.
 ## Iteration Notes
 
 The prompt evolved from:
-- unstructured text responses 
-→ structured JSON output 
+- unstructured text responses  
+→ structured JSON output  
 
 Key improvements:
 - enforced schema
