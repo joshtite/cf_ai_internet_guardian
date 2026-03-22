@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 const API_BASE = "https://small-grass-aec4.joshua-tite.workers.dev";
+const HISTORY_STORAGE_KEY = "internet_guardian_recent_scans";
 
 function App() {
   const [url, setUrl] = useState("");
@@ -10,10 +11,32 @@ function App() {
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
 
-  const handleAnalyse = async (customUrl = null) => {
-    const urlToUse = customUrl || url;
+  useEffect(() => {
+    try {
+      const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+      if (savedHistory) {
+        const parsedHistory = JSON.parse(savedHistory);
+        if (Array.isArray(parsedHistory)) {
+          setHistory(parsedHistory);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load scan history:", err);
+    }
+  }, []);
 
-    if (!urlToUse.trim()) {
+  useEffect(() => {
+    try {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    } catch (err) {
+      console.error("Failed to save scan history:", err);
+    }
+  }, [history]);
+
+  const handleAnalyse = async (customUrl = null) => {
+    const urlToUse = (customUrl || url).trim();
+
+    if (!urlToUse) {
       setError("Please enter a website URL.");
       setResult(null);
       return;
@@ -25,7 +48,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `${API_BASE}/?url=${encodeURIComponent(urlToUse.trim())}`
+        `${API_BASE}/?url=${encodeURIComponent(urlToUse)}`
       );
 
       const data = await response.json();
@@ -35,11 +58,12 @@ function App() {
       }
 
       setResult(data);
+      setUrl(urlToUse);
 
       setHistory((prev) => {
         const updated = [
-          urlToUse.trim(),
-          ...prev.filter((item) => item !== urlToUse.trim()),
+          urlToUse,
+          ...prev.filter((item) => item !== urlToUse),
         ];
         return updated.slice(0, 5);
       });
@@ -56,6 +80,7 @@ function App() {
   };
 
   const analysis = result?.analysis;
+  const riskScore = analysis?.riskScore;
 
   return (
     <div className="app">
@@ -111,13 +136,14 @@ function App() {
                 <strong>Fetched URL:</strong> {result.fetchedUrl}
               </p>
               <p>
-  <strong>Risk Level:</strong>{" "}
-  {analysis?.riskScore <= 3
-    ? "🟢 Low"
-    : analysis?.riskScore <= 6
-    ? "🟡 Medium"
-    : "🔴 High"} ({analysis?.riskScore}/10)
-</p>
+                <strong>Risk Level:</strong>{" "}
+                {riskScore <= 3
+                  ? "🟢 Low"
+                  : riskScore <= 6
+                  ? "🟡 Medium"
+                  : "🔴 High"}{" "}
+                ({riskScore}/10)
+              </p>
               <p>
                 <strong>Title:</strong> {result.pageInfo?.title || "Not found"}
               </p>
