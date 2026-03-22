@@ -111,6 +111,14 @@ function App() {
                 <strong>Fetched URL:</strong> {result.fetchedUrl}
               </p>
               <p>
+  <strong>Risk Level:</strong>{" "}
+  {analysis?.riskScore <= 3
+    ? "🟢 Low"
+    : analysis?.riskScore <= 6
+    ? "🟡 Medium"
+    : "🔴 High"} ({analysis?.riskScore}/10)
+</p>
+              <p>
                 <strong>Title:</strong> {result.pageInfo?.title || "Not found"}
               </p>
               <p>
