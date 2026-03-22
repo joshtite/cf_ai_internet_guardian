@@ -5,15 +5,16 @@ export default {
 
     if (!target.trim()) {
       return jsonResponse(
-        {
-          error: "Please provide a URL like ?url=example.com"
-        },
+        { error: "Please provide a URL like ?url=example.com" },
         400
       );
     }
 
     let cleanedUrl = target.trim();
-    if (!cleanedUrl.startsWith("http://") && !cleanedUrl.startsWith("https://")) {
+    if (
+      !cleanedUrl.startsWith("http://") &&
+      !cleanedUrl.startsWith("https://")
+    ) {
       cleanedUrl = `https://${cleanedUrl}`;
     }
 
@@ -41,20 +42,18 @@ export default {
       const metaDescriptionMatch = html.match(
         /<meta[^>]+name=["']description["'][^>]+content=["'](.*?)["']/i
       );
-      const h1Matches = [...html.matchAll(/<h1[^>]*>(.*?)<\/h1>/gi)].map(match =>
-        stripHtml(match[1]).trim()
+      const h1Matches = [...html.matchAll(/<h1[^>]*>(.*?)<\/h1>/gi)].map(
+        (match) => stripHtml(match[1]).trim()
       );
 
-      const trimmedHtml = html
-        .replace(/\s+/g, " ")
-        .slice(0, 4000);
+      const trimmedHtml = html.replace(/\s+/g, " ").slice(0, 2500);
 
       const prompt = `
-You are a careful website performance, security, and SEO reviewer.
+You are a strict JSON API for website analysis.
 
-Analyse the following website using ONLY the information provided.
-Do not invent vulnerabilities or claims you cannot support.
-If something cannot be confirmed, say "Not enough evidence from the provided HTML."
+Analyse the website using ONLY the information provided below.
+Do not invent vulnerabilities or unsupported claims.
+If something cannot be confirmed, say: "Not enough evidence from the provided HTML."
 
 Website URL: ${cleanedUrl}
 
@@ -66,23 +65,26 @@ Known page details:
 HTML snippet:
 ${trimmedHtml}
 
-Return valid JSON in exactly this format:
+Return ONLY valid JSON.
+Do not include markdown.
+Do not include code fences.
+Do not include any text before or after the JSON.
+
+Use this exact structure:
 {
   "url": "${cleanedUrl}",
-  "security": [
-    "item 1",
-    "item 2"
-  ],
-  "performance": [
-    "item 1",
-    "item 2"
-  ],
-  "seo": [
-    "item 1",
-    "item 2"
-  ],
+  "riskScore": 1,
+  "security": ["item 1", "item 2"],
+  "performance": ["item 1", "item 2"],
+  "seo": ["item 1", "item 2"],
   "summary": "short overall summary"
 }
+
+Rules:
+- riskScore must be an integer from 1 to 10
+- security, performance, and seo must always be arrays
+- summary must always be a short string
+- return JSON only
 `;
 
       const aiResponse = await env.AI.run("@cf/meta/llama-3-8b-instruct", {
@@ -94,17 +96,31 @@ Return valid JSON in exactly this format:
         ]
       });
 
+      const rawText = aiResponse.response || "";
+
       let parsed;
       try {
-        const rawText = aiResponse.response || "";
         parsed = extractJson(rawText);
+
+        parsed = {
+          url: parsed.url || cleanedUrl,
+          riskScore: normalizeRiskScore(parsed.riskScore),
+          security: Array.isArray(parsed.security) ? parsed.security : [],
+          performance: Array.isArray(parsed.performance) ? parsed.performance : [],
+          seo: Array.isArray(parsed.seo) ? parsed.seo : [],
+          summary:
+            typeof parsed.summary === "string" && parsed.summary.trim()
+              ? parsed.summary.trim()
+              : "No summary returned."
+        };
       } catch {
         parsed = {
           url: cleanedUrl,
+          riskScore: 5,
           security: ["AI response could not be cleanly parsed yet."],
           performance: [],
           seo: [],
-          summary: aiResponse.response || "No summary returned."
+          summary: rawText || "No summary returned."
         };
       }
 
@@ -153,4 +169,10 @@ function extractJson(text) {
   }
 
   return JSON.parse(text.slice(start, end + 1));
+}
+
+function normalizeRiskScore(score) {
+  const num = Number(score);
+  if (!Number.isFinite(num)) return 5;
+  return Math.min(10, Math.max(1, Math.round(num)));
 }
