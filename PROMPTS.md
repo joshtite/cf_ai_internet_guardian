@@ -31,15 +31,17 @@ Do not include code fences.
 Do not include any text before or after the JSON.
 
 Use this exact structure:
+
+```json
 {
   "url": "{url}",
-  "riskScore": number (1-10),
+  "riskScore": "number (1-10)",
   "security": ["..."],
   "performance": ["..."],
   "seo": ["..."],
   "summary": "..."
 }
-
+```
 Rules:
 
 - riskScore must be an integer from 1 to 10
