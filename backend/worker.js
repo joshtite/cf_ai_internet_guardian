@@ -84,6 +84,7 @@ Rules:
 - riskScore must be an integer from 1 to 10
 - security, performance, and seo must always be arrays
 - summary must always be a short string
+  If the URL starts with "https://", do NOT say SSL is missing.
 - return JSON only
 `;
 
